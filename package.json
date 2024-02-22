@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "make-js-component-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "make-js-component-vscode.make-js-component",
+        "title": "Make JS Component"
       }
     ]
   },
