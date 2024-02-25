@@ -6,29 +6,6 @@ import fs from 'fs';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 
-class FramkeWorkItem implements vscode.QuickPickItem {
-	label: string;
-	description?: string | undefined;
-	picked?: boolean | undefined;
-	alwaysShow?: boolean | undefined;
-	detail?: string | undefined;
-	kind?: vscode.QuickPickItemKind | undefined;
-
-	constructor(label: string, description?: string | undefined, picked?: boolean | undefined, alwaysShow?: boolean | undefined, detail?: string | undefined, kind?: vscode.QuickPickItemKind | undefined) {
-		this.label = label;
-		this.description = description;
-		this.picked = picked;
-		this.alwaysShow = alwaysShow;
-		this.detail = detail;
-		this.kind = kind;
-	}
-}
-
-const availableFrameworks:  FramkeWorkItem[] = [
-	new FramkeWorkItem('Vue', 'Vue.js'),
-	new FramkeWorkItem('React', 'React.js'),
-	new FramkeWorkItem('Angular', 'Angular.js'),
-];
 
 
 export  function activate(context: vscode.ExtensionContext) {
@@ -40,6 +17,7 @@ export  function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
+	
 	let disposable = vscode.commands.registerCommand('make-js-component-vscode.make-js-component', async () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
@@ -64,9 +42,13 @@ export  function activate(context: vscode.ExtensionContext) {
 			default:
 				break;
 		}
-
-		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, vscode.workspace.rootPath + '/components/' + componentName + ext);
-		vscode.window.showInformationMessage(`Make a ${framework} component named: ${componentName}!`);
+		const newComponentPath = vscode.workspace.rootPath + '/components/' + componentName + ext;
+		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
+		if(componentName){
+			fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/ComponentName/g, componentName), 'utf8')
+		}
+		vscode.workspace.openTextDocument(newComponentPath).then(doc => vscode.window.showTextDocument(doc));
+		vscode.window.showInformationMessage(`Component ${componentName} created!`);
 	});
 
 	context.subscriptions.push(disposable);
