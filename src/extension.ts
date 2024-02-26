@@ -54,7 +54,7 @@ export  function activate(context: vscode.ExtensionContext) {
 			default:
 				break;
 		}
-		const newComponentPath = vscode.workspace.rootPath + '/components/' + componentName + ext;
+		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
 		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
 		if(componentName){
 			fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/ComponentName/g, componentName), 'utf8')
@@ -90,7 +90,7 @@ export  function activate(context: vscode.ExtensionContext) {
 			framework = 'Svelte';
 		}
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
-		const newComponentPath = vscode.workspace.rootPath + '/components/' + componentName + ext;
+		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
 		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
 		if(componentName){
 			fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/ComponentName/g, componentName), 'utf8')
