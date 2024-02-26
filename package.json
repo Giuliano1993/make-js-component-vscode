@@ -2,6 +2,10 @@
   "name": "make-js-component-vscode",
   "displayName": "make-js-component-vscode",
   "description": "Streamline your component creation directly in your editor",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Giuliano1993/make-js-component-vscode"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.86.0"
@@ -16,6 +20,10 @@
       {
         "command": "make-js-component-vscode.make-js-component",
         "title": "Make JS Component"
+      },
+      {
+        "command": "make-js-component-vscode.make-js-component-quick",
+        "title": "Make JS Component - Detect Framework"
       }
     ]
   },

@@ -22,7 +22,7 @@ export  function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		
-		const framework = await vscode.window.showQuickPick(["Vue", "React", "Astro"]);
+		const framework = await vscode.window.showQuickPick(["Vue", "React", "Angular","Qwik","Astro","Svelte"]);
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
 		let filename = '';
 		let ext = '.js';
@@ -39,6 +39,18 @@ export  function activate(context: vscode.ExtensionContext) {
 				filename = 'component.astro.stub';
 				ext = '.astro';
 				break;
+			case 'Svelte':
+				filename = 'component-js.svelte.stub';
+				ext = '.svelte';
+				break;
+			case 'Qwik':
+				filename = 'hello-world-component.tsx.stub';
+				ext = '.qwik.ts';
+				break;
+			case 'Angular':
+				filename = 'component.component.ts.stub';
+				ext = '.ts';
+				break;
 			default:
 				break;
 		}
@@ -51,7 +63,43 @@ export  function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage(`Component ${componentName} created!`);
 	});
 
-	context.subscriptions.push(disposable);
+
+
+	let quickCommand = vscode.commands.registerCommand('make-js-component-vscode.make-js-component-quick', async () => {
+		const packageJsonPath = vscode.workspace.rootPath + '/package.json';
+		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+		const dependencies = Object.keys(packageJson.dependencies);
+		let filename = '';
+		let ext = '.js';
+		let framework = '';
+		if(dependencies.includes('vue')){
+			filename = 'component-options.vue.stub';
+			ext = '.vue';
+			framework = 'Vue';
+		}else if(dependencies.includes('react')){
+			filename = 'function-component.tsx.stub';
+			ext = '.tsx';
+			framework = 'React';
+		}else if(dependencies.includes('astro')){
+			filename = 'component.astro.stub';
+			ext = '.astro';
+			framework = 'Astro';
+		}else if(dependencies.includes('svelte')){
+			filename = 'component-js.svelte.stub';
+			ext = '.svelte';
+			framework = 'Svelte';
+		}
+		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
+		const newComponentPath = vscode.workspace.rootPath + '/components/' + componentName + ext;
+		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
+		if(componentName){
+			fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/ComponentName/g, componentName), 'utf8')
+		}
+		vscode.workspace.openTextDocument(newComponentPath).then(doc => vscode.window.showTextDocument(doc));
+		vscode.window.showInformationMessage(`Component ${componentName} created!`);
+			
+	})
+	context.subscriptions.push(disposable, quickCommand);
 }
 
 // This method is called when your extension is deactivated
