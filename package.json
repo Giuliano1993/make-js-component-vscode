@@ -3,6 +3,7 @@
   "displayName": "make-js-component",
   "description": "Streamline your component creation directly in your editor",
   "publisher": "ghostylab",
+  "icon":"./images/logo.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/Giuliano1993/make-js-component-vscode"
