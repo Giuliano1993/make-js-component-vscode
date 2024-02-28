@@ -13,10 +13,12 @@ At the moment we support the following JS Frameworks:
 
 ### Make Js Component
 The basic command. It let you create a component, choosing the name and picking the framework
+
 ![generic-command](./reamdevideo/mjc-generic.gif)
 
 ### Make Js Component - Detect Framework
 Leave the framework choice to MJC, it will detect the framework you're using and will pick the correct component template for you.
+
 ![detected-command](./reamdevideo/MJC-detected.gif)
 
 
