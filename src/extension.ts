@@ -7,6 +7,24 @@ import fs from 'fs';
 // Your extension is activated the very first time the command is executed
 
 
+const detectFramework = ()=>{
+		const packageJsonPath = vscode.workspace.rootPath + '/package.json';
+		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+		const dependencies = Object.keys(packageJson.dependencies);
+		if(dependencies.includes('vue')){
+			return 'Vue';
+		}else if(dependencies.includes('react')){
+			return 'React';
+		}else if(dependencies.includes('astro')){
+			return 'Astro';
+		}else if(dependencies.includes('svelte')){
+			return 'Svelte';
+		}else{
+			return '';
+		
+		}
+}
+
 
 export  function activate(context: vscode.ExtensionContext) {
 
@@ -22,25 +40,32 @@ export  function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		
-		const framework = await vscode.window.showQuickPick(["Vue", "React", "Angular","Qwik","Astro","Svelte"]);
+		const framework = await vscode.window.showQuickPick(["Vue", "React", "Angular","Qwik","Astro","Svelte"], { placeHolder: 'Select framework' });
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
+		let useTs = false;
+		if(["React", "Angular","Svelte"].includes(framework||'')){
+			useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
+		}
 		let filename = '';
 		let ext = '.js';
 		switch (framework) {
 			case 'Vue':
-				filename = 'component-options.vue.stub';
+				let type = await vscode.window.showQuickPick(["Options API", "Composition API"], { placeHolder: 'Select type' });
+				type = type?.split(' ')[0].toLocaleLowerCase();
+				filename = `component-${type}.vue.stub`;
 				ext = '.vue';
 				break;
 			case 'React':
-				filename = 'function-component.tsx.stub';
-				ext = '.tsx';
+				ext = useTs ? '.tsx' : '.jsx';
+				filename = `function-component${ext}.stub`;
 				break;
 			case 'Astro':
 				filename = 'component.astro.stub';
 				ext = '.astro';
 				break;
 			case 'Svelte':
-				filename = 'component-js.svelte.stub';
+				const ts = useTs ? 'ts' : 'js';
+				filename = `component-${ts}.svelte.stub`;
 				ext = '.svelte';
 				break;
 			case 'Qwik':
@@ -48,8 +73,8 @@ export  function activate(context: vscode.ExtensionContext) {
 				ext = '.qwik.ts';
 				break;
 			case 'Angular':
-				filename = 'component.component.ts.stub';
-				ext = '.ts';
+				ext = useTs ? '.ts' : '.js';
+				filename = `component.component${ext}.stub`;
 				break;
 			default:
 				break;
@@ -65,29 +90,44 @@ export  function activate(context: vscode.ExtensionContext) {
 
 
 
-	let quickCommand = vscode.commands.registerCommand('make-js-component-vscode.make-js-component-quick', async () => {
-		const packageJsonPath = vscode.workspace.rootPath + '/package.json';
-		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-		const dependencies = Object.keys(packageJson.dependencies);
+	let quickCommand = vscode.commands.registerCommand('make-js-component-vscode.make-js-component-quick', async () => {	
 		let filename = '';
 		let ext = '.js';
-		let framework = '';
-		if(dependencies.includes('vue')){
-			filename = 'component-options.vue.stub';
-			ext = '.vue';
-			framework = 'Vue';
-		}else if(dependencies.includes('react')){
-			filename = 'function-component.tsx.stub';
-			ext = '.tsx';
-			framework = 'React';
-		}else if(dependencies.includes('astro')){
-			filename = 'component.astro.stub';
-			ext = '.astro';
-			framework = 'Astro';
-		}else if(dependencies.includes('svelte')){
-			filename = 'component-js.svelte.stub';
-			ext = '.svelte';
-			framework = 'Svelte';
+		let framework = detectFramework();
+		let useTs = false;
+		if(["React", "Angular","Svelte"].includes(framework||'')){
+			useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
+		}
+		switch (framework) {
+			case 'Vue':
+				let type = await vscode.window.showQuickPick(["Options API", "Composition API"], { placeHolder: 'Select type' });
+				type = type?.split(' ')[0].toLocaleLowerCase();
+				filename = `component-${type}.vue.stub`;
+				ext = '.vue';
+				break;
+			case 'React':
+				ext = useTs ? '.tsx' : '.jsx';
+				filename = `function-component${ext}.stub`;
+				break;
+			case 'Astro':
+				filename = 'component.astro.stub';
+				ext = '.astro';
+				break;
+			case 'Svelte':
+				const ts = useTs ? 'ts' : 'js';
+				filename = `component-${ts}.svelte.stub`;
+				ext = '.svelte';
+				break;
+			case 'Qwik':
+				filename = 'hello-world-component.tsx.stub';
+				ext = '.qwik.ts';
+				break;
+			case 'Angular':
+				ext = useTs ? '.ts' : '.js';
+				filename = `component.component${ext}.stub`;
+				break;
+			default:
+				break;
 		}
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
 		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
@@ -101,6 +141,8 @@ export  function activate(context: vscode.ExtensionContext) {
 	})
 	context.subscriptions.push(disposable, quickCommand);
 }
+
+
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
