@@ -27,7 +27,14 @@
         "command": "make-js-component-vscode.make-js-component-quick",
         "title": "Make JS Component - Detect Framework"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [{
+        "command":"make-js-component-vscode.make-js-component-quick",
+        "when": "editorHasSelection",
+        "group": "navigation"
+      }]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

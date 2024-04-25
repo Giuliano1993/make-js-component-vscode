@@ -132,11 +132,19 @@ export  function activate(context: vscode.ExtensionContext) {
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
 		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
 		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
+		const editor = vscode.window.activeTextEditor;
+		const selection = editor?.selection;
+		if (selection && !selection.isEmpty) {
+			const selectionRange = new vscode.Range(selection.start.line, selection.start.character, selection.end.line, selection.end.character);
+			const highlighted = editor.document.getText(selectionRange);
+			console.log(highlighted);
+		}
 		if(componentName){
 			fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/ComponentName/g, componentName), 'utf8')
 		}
 		vscode.workspace.openTextDocument(newComponentPath).then(doc => vscode.window.showTextDocument(doc));
 		vscode.window.showInformationMessage(`Component ${componentName} created!`);
+
 			
 	})
 	context.subscriptions.push(disposable, quickCommand);
