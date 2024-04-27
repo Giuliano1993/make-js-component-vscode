@@ -20,6 +20,11 @@
   "contributes": {
     "commands": [
       {
+        "command": "make-js-component-vscode.make-js-component-from-selection",
+        "title": "Make JS Component - from selection",
+        "when":"editorHasSelection"
+      },
+      {
         "command": "make-js-component-vscode.make-js-component",
         "title": "Make JS Component"
       },
@@ -30,7 +35,7 @@
     ],
     "menus": {
       "editor/context": [{
-        "command":"make-js-component-vscode.make-js-component-quick",
+        "command":"make-js-component-vscode.make-js-component-from-selection",
         "when": "editorHasSelection",
         "group": "navigation"
       }]
