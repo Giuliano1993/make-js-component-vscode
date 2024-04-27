@@ -41,44 +41,14 @@ export  function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		
 		const framework = await vscode.window.showQuickPick(["Vue", "React", "Angular","Qwik","Astro","Svelte"], { placeHolder: 'Select framework' });
+
+		if(typeof framework === "undefined"){
+			vscode.window.showErrorMessage(`You must select a framework to continue`);
+			return
+		}
+		let useTs = await useTypescript(framework);
+		const {filename, ext} = await componentStubBasis(framework, useTs);	
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
-		let useTs = false;
-		if(["React", "Angular","Svelte"].includes(framework||'')){
-			useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
-		}
-		let filename = '';
-		let ext = '.js';
-		switch (framework) {
-			case 'Vue':
-				let type = await vscode.window.showQuickPick(["Options API", "Composition API"], { placeHolder: 'Select type' });
-				type = type?.split(' ')[0].toLocaleLowerCase();
-				filename = `component-${type}.vue.stub`;
-				ext = '.vue';
-				break;
-			case 'React':
-				ext = useTs ? '.tsx' : '.jsx';
-				filename = `function-component${ext}.stub`;
-				break;
-			case 'Astro':
-				filename = 'component.astro.stub';
-				ext = '.astro';
-				break;
-			case 'Svelte':
-				const ts = useTs ? 'ts' : 'js';
-				filename = `component-${ts}.svelte.stub`;
-				ext = '.svelte';
-				break;
-			case 'Qwik':
-				filename = 'hello-world-component.tsx.stub';
-				ext = '.qwik.ts';
-				break;
-			case 'Angular':
-				ext = useTs ? '.ts' : '.js';
-				filename = `component.component${ext}.stub`;
-				break;
-			default:
-				break;
-		}
 		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
 		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
 		if(componentName){
@@ -91,44 +61,11 @@ export  function activate(context: vscode.ExtensionContext) {
 
 
 	let quickCommand = vscode.commands.registerCommand('make-js-component-vscode.make-js-component-quick', async () => {	
-		let filename = '';
-		let ext = '.js';
+		
 		let framework = detectFramework();
-		let useTs = false;
-		if(["React", "Angular","Svelte"].includes(framework||'')){
-			useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
-		}
-		switch (framework) {
-			case 'Vue':
-				let type = await vscode.window.showQuickPick(["Options API", "Composition API"], { placeHolder: 'Select type' });
-				type = type?.split(' ')[0].toLocaleLowerCase();
-				filename = `component-${type}.vue.stub`;
-				ext = '.vue';
-				break;
-			case 'React':
-				ext = useTs ? '.tsx' : '.jsx';
-				filename = `function-component${ext}.stub`;
-				break;
-			case 'Astro':
-				filename = 'component.astro.stub';
-				ext = '.astro';
-				break;
-			case 'Svelte':
-				const ts = useTs ? 'ts' : 'js';
-				filename = `component-${ts}.svelte.stub`;
-				ext = '.svelte';
-				break;
-			case 'Qwik':
-				filename = 'hello-world-component.tsx.stub';
-				ext = '.qwik.ts';
-				break;
-			case 'Angular':
-				ext = useTs ? '.ts' : '.js';
-				filename = `component.component${ext}.stub`;
-				break;
-			default:
-				break;
-		}
+		let useTs = await useTypescript(framework);
+		const {filename, ext} = await componentStubBasis(framework, useTs);	
+		
 		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
 		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
 		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
@@ -145,13 +82,43 @@ export  function activate(context: vscode.ExtensionContext) {
 
 
 	let componentFromSelectionCommand = vscode.commands.registerCommand('make-js-component-vscode.make-js-component-from-selection', async () => {	
-		let filename = '';
-		let ext = '.js';
+		
 		let framework = detectFramework();
-		let useTs = false;
-		if(["React", "Angular","Svelte"].includes(framework||'')){
-			useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
+		let useTs = await useTypescript(framework);
+		const {filename, ext} = await componentStubBasis(framework, useTs);	
+		
+		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
+		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
+		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
+		const editor = vscode.window.activeTextEditor;
+		const selection = editor?.selection;
+		if (selection && !selection.isEmpty) {
+			const selectionRange = new vscode.Range(selection.start.line, selection.start.character, selection.end.line, selection.end.character);
+			const highlighted = editor.document.getText(selectionRange);
+			if(highlighted){
+				fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/Hello ComponentName/g, highlighted), 'utf8')
+			}
 		}
+		vscode.workspace.openTextDocument(newComponentPath).then(doc => vscode.window.showTextDocument(doc));
+		vscode.window.showInformationMessage(`Component ${componentName} created!`);
+
+			
+	});
+
+
+	
+	const useTypescript = async (framework: string)=>{
+		
+			let useTs = false;
+			if(["React", "Angular","Svelte"].includes(framework||'')){
+				useTs = await vscode.window.showQuickPick(["Yes", "No"],{placeHolder: "Use Typescript?"}) === "Yes";
+			}
+			return useTs;
+	}
+
+	const componentStubBasis = async (framework: string, useTs: boolean)=>{
+		let filename = "";
+		let ext = ".js";
 		switch (framework) {
 			case 'Vue':
 				let type = await vscode.window.showQuickPick(["Options API", "Composition API"], { placeHolder: 'Select type' });
@@ -183,23 +150,11 @@ export  function activate(context: vscode.ExtensionContext) {
 			default:
 				break;
 		}
-		const componentName = await vscode.window.showInputBox({ placeHolder: 'Enter component name' });
-		const newComponentPath = vscode.workspace.rootPath + '/src/components/' + componentName + ext;
-		fs.copyFileSync(__dirname + '/stubs/' + framework?.toLowerCase() + '/' + filename, newComponentPath);
-		const editor = vscode.window.activeTextEditor;
-		const selection = editor?.selection;
-		if (selection && !selection.isEmpty) {
-			const selectionRange = new vscode.Range(selection.start.line, selection.start.character, selection.end.line, selection.end.character);
-			const highlighted = editor.document.getText(selectionRange);
-			if(componentName){
-				fs.writeFileSync(newComponentPath, fs.readFileSync(newComponentPath, 'utf8').replace(/Hello ComponentName/g, highlighted), 'utf8')
-			}
-		}
-		vscode.workspace.openTextDocument(newComponentPath).then(doc => vscode.window.showTextDocument(doc));
-		vscode.window.showInformationMessage(`Component ${componentName} created!`);
-
-			
-	})
+		return {
+			ext: ext,
+			filename: filename
+		};
+	}
 
 	context.subscriptions.push(disposable, quickCommand,componentFromSelectionCommand);
 }
