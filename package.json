@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/Giuliano1993/make-js-component-vscode"
   },
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.86.0"
   },
@@ -22,7 +22,7 @@
       {
         "command": "make-js-component-vscode.make-js-component-from-selection",
         "title": "Make JS Component - from selection",
-        "when":"editorHasSelection"
+        "when": "editorHasSelection"
       },
       {
         "command": "make-js-component-vscode.make-js-component",
@@ -34,15 +34,17 @@
       }
     ],
     "menus": {
-      "editor/context": [{
-        "command":"make-js-component-vscode.make-js-component-from-selection",
-        "when": "editorHasSelection",
-        "group": "navigation"
-      }],
+      "editor/context": [
+        {
+          "command": "make-js-component-vscode.make-js-component-from-selection",
+          "when": "editorHasSelection",
+          "group": "navigation"
+        }
+      ],
       "commandPalette": [
         {
           "command": "make-js-component-vscode.make-js-component-from-selection",
-          "when":"editorHasSelection"
+          "when": "editorHasSelection"
         }
       ]
     }
