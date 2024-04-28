@@ -22,6 +22,12 @@ Leave the framework choice to MJC, it will detect the framework you're using and
 ![detected-command](./reamdevideo/MJC-detected.gif)
 
 
+### Make Js Component - from selection
+
+If you want to make a part of your template a separate component, you can just select it, right click and choose the command "Make JS Component - from selection". The framework will be automatically detected and you'll have your new component in seconds
+
+
+![detected-command](./reamdevideo/MJC-selection.gif)
 
 > **Warning!**
 > 
