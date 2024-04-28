@@ -38,7 +38,13 @@
         "command":"make-js-component-vscode.make-js-component-from-selection",
         "when": "editorHasSelection",
         "group": "navigation"
-      }]
+      }],
+      "commandPalette": [
+        {
+          "command": "make-js-component-vscode.make-js-component-from-selection",
+          "when":"editorHasSelection"
+        }
+      ]
     }
   },
   "scripts": {
